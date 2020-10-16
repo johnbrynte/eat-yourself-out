@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://assets/tree-variations.png" type="Texture" id=1]
+
+[node name="Spatial" type="Spatial"]
+
+[node name="TreeSmall1" type="Sprite3D" parent="."]
+transform = Transform( 0.18, 0, 0, 0, 0.18, 0, 0, 0, 1, 0, 0.0684835, 0 )
+texture = ExtResource( 1 )
+region_enabled = true
+region_rect = Rect2( 191.466, 63.8163, 65.0053, 96.5129 )

@@ -1,0 +1,102 @@
+[gd_scene load_steps=19 format=2]
+
+[ext_resource path="res://assets/grass.png" type="Texture" id=1]
+[ext_resource path="res://World.gd" type="Script" id=2]
+[ext_resource path="res://assets/elf_f_run_anim_f3.png" type="Texture" id=3]
+[ext_resource path="res://assets/elf_f_run_anim_f2.png" type="Texture" id=4]
+[ext_resource path="res://assets/elf_f_idle_anim_f0.png" type="Texture" id=5]
+[ext_resource path="res://assets/elf_f_idle_anim_f2.png" type="Texture" id=6]
+[ext_resource path="res://assets/elf_f_run_anim_f1.png" type="Texture" id=7]
+[ext_resource path="res://assets/elf_f_idle_anim_f1.png" type="Texture" id=8]
+[ext_resource path="res://assets/elf_f_run_anim_f0.png" type="Texture" id=9]
+[ext_resource path="res://assets/elf_f_idle_anim_f3.png" type="Texture" id=10]
+[ext_resource path="res://assets/circle.jpg" type="Texture" id=11]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial;
+render_mode unshaded;
+
+const float PI = 3.14159265359;
+
+void vertex() {
+	vec2 v = vec2(VERTEX.x, VERTEX.z)-vec2(0.5, 0.5);
+	VERTEX.y = cos(v.x*PI*0.2+PI*(1.25-0.1));// * cos(v.y*PI*0.5+PI*1.25);
+}
+
+void fragment() {
+	ALBEDO = vec3(UV, 0.0);
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+
+[sub_resource type="PlaneMesh" id=3]
+material = SubResource( 2 )
+subdivide_width = 24
+subdivide_depth = 24
+
+[sub_resource type="SphereMesh" id=4]
+radial_segments = 128
+rings = 64
+
+[sub_resource type="Shader" id=6]
+code = "shader_type spatial;
+
+const float PI = 3.14159265359;
+
+uniform sampler2D image;
+uniform vec2 offset;
+uniform float resolution;
+
+void fragment() {
+	vec2 v = offset;
+	v.x /= PI;
+	ALBEDO = texture(image, UV*resolution - v).rgb;
+}"
+
+[sub_resource type="ShaderMaterial" id=7]
+shader = SubResource( 6 )
+shader_param/offset = Vector2( 0, 0 )
+shader_param/resolution = 96.0
+shader_param/image = ExtResource( 1 )
+
+[sub_resource type="SpriteFrames" id=8]
+animations = [ {
+"frames": [ ExtResource( 5 ), ExtResource( 8 ), ExtResource( 6 ), ExtResource( 10 ) ],
+"loop": true,
+"name": "idle",
+"speed": 5.0
+}, {
+"frames": [ ExtResource( 9 ), ExtResource( 7 ), ExtResource( 4 ), ExtResource( 3 ) ],
+"loop": true,
+"name": "run",
+"speed": 5.0
+} ]
+
+[node name="World" type="Spatial"]
+script = ExtResource( 2 )
+speed = 1
+cameraSpeed = 2
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( -1, 1.34161e-07, -2.9694e-07, 0, 0.911303, 0.411737, 3.25841e-07, 0.411737, -0.911303, 0, 0.51, -1.161 )
+fov = 26.8
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+visible = false
+mesh = SubResource( 3 )
+material/0 = null
+
+[node name="Globe" type="MeshInstance" parent="."]
+transform = Transform( 4, 0, 0, 0, -1.74846e-07, -4, 0, 4, -1.74846e-07, 0, -4, 0 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 7 )
+
+[node name="Character" type="AnimatedSprite3D" parent="."]
+transform = Transform( 0.317, 0, 0, 0, 0.317, 0, 0, 0, 1, 0, 0.0446961, 0 )
+frames = SubResource( 8 )
+animation = "idle"
+
+[node name="Sprite3D" type="Sprite3D" parent="Character"]
+transform = Transform( 0.04, 0, 0, 0, -4.37114e-10, -1, 0, 0.01, -4.37114e-08, -0.00576492, -0.136756, -2.23894e-09 )
+texture = ExtResource( 11 )
