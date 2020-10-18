@@ -23,7 +23,17 @@ var mapTiles = {}
 var currentTile = Vector2.ZERO
 var mapRandom = RandomNumberGenerator.new()
 
+var rBerries = {
+	"berry1": load("res://assets/berry1.png"),
+	"berry2": load("res://assets/berry2.png"),
+	"berry3": load("res://assets/berry3.png"),
+	"berry4": load("res://assets/berry4.png"),
+	"berry5": load("res://assets/berry5.png"),
+	"berry6": load("res://assets/berry6.png"),
+}
+var berryTypes = rBerries.keys()
 var rItems = {
+	"Berry": load("res://Berry.tscn"),
 	"Item": load("res://Item.tscn"),
 	"Bush1": load("res://Bush1.tscn"),
 	"TreeBig1": load("res://TreeBig1.tscn"),
@@ -154,6 +164,42 @@ func _physics_process(delta):
 							pushback.x *= PI*4
 							pushback.y *= 8
 							pos += pushback
+			
+			for berry in map[j][i].berries:
+				if berry.berries == 0:
+					continue
+				
+				var p = berry.vpos - Vector3(vpos.x, vpos.y, 0)
+				
+				if p.length() > 2:
+					if berry.has("instance"):
+						if berry.has("instances"):
+							for b in berry.instances:
+								add_child(b)
+								freeItem("Berry", b)
+							freeItem("Spatial", berry.instance)
+							berry.erase("instance")
+							berry.erase("instances")
+				else:
+					if not berry.has("instance"):
+						berry.instance = getItem("Spatial")
+						berry.instances = []
+						add_child(berry.instance)
+						for k in range(berry.berries):
+							var b = getItem("Berry", berry.instance)
+							b.setTexture(rBerries[berry.type])
+							b.transform.origin = Vector3(randf()*0.04-0.02, 0.01+randf()*0.02, -0.001) #randf()*0.04-0.02, 0.01+randf()*0.02, 0.05)
+							berry.instances.append(b)
+					
+					var z = 16 - pow(p.x, 2) - pow(p.y, 2)
+					if z <= 0:
+						# hide
+						berry.instance.transform.origin.y = -10
+					else:
+						z = sqrt(z)
+						berry.instance.transform.origin.x = -p.x
+						berry.instance.transform.origin.z = -p.y
+						berry.instance.transform.origin.y = p.z + z - 4
 	
 	var z = sqrt(1 - pow(cpos.x, 2) - pow(cpos.y, 2))
 	$Character.transform.origin.x = cpos.x
@@ -193,7 +239,9 @@ func loadSegment(ox, oy):
 				loadTile(map[j][i])
 			else:
 				map[j][i].items = map[j2][i2].items
+				map[j][i].berries = map[j2][i2].berries
 				map[j2][i2].items = []
+				map[j2][i2].erase("berries")
 
 func loadTile(m):
 	var x = m.x
@@ -204,6 +252,11 @@ func loadTile(m):
 	r.seed = tile.seed
 	
 	assert(len(m.items) == 0, "Items list should be empty")
+	
+	var generateBerries = false
+	if not m.has("berries"):
+		m.berries = []
+		generateBerries = true
 	
 	var ox = x*tileSize
 	var oy = y*tileSize
@@ -233,11 +286,20 @@ func loadTile(m):
 		}
 		item.instance = getItem(item.type)
 		m.items.append(item)
+		
+		if generateBerries:
+			if r.randf() > 0.3:
+				var type = berryTypes[r.randi_range(0, len(berryTypes)-1)]
+
+				m.berries.append({
+					"vpos": Vector3(item.vpos.x, item.vpos.y + 0.025, 0),
+					"type": type,
+					"berries": r.randi_range(1,4),
+				})
 
 func unloadTile(m):
 	var x = m.x
 	var y = m.y
-	prints("unload",x,y)
 	var tile = getTile(x, y)
 	
 	for item in m.items:
@@ -262,15 +324,19 @@ func getTile(x, y):
 func getTileKey(x, y):
 	return str(x)+","+str(y)
 
-func getItem(name):
+func getItem(name, parent = self):
 	if not itemBuffer.has(name):
 		itemBuffer[name] = []
 	if len(itemBuffer[name]) > 0:
 		var item = itemBuffer[name].pop_back()
 		item.show()
 		return item
-	var item = rItems[name].instance()
-	add_child(item)
+	var item
+	if name == "Spatial":
+		item = Spatial.new()
+	else:
+		item = rItems[name].instance()
+	parent.add_child(item)
 	item.show()
 	if name == "TreeBig1":
 		loadedTrees += 1

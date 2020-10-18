@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://assets/berry5.png" type="Texture" id=1]
+[ext_resource path="res://Berry.gd" type="Script" id=2]
+
+[node name="Berry" type="Spatial"]
+script = ExtResource( 2 )
+
+[node name="BerrySprite" type="Sprite3D" parent="."]
+transform = Transform( 0.005, 0, 0, 0, 0.005, 0, 0, 0, 1, 0, 0, 0 )
+texture = ExtResource( 1 )
