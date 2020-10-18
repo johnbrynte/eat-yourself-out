@@ -75,12 +75,20 @@ animations = [ {
 
 [node name="World" type="Spatial"]
 script = ExtResource( 2 )
-speed = 1
+speed = 4
 cameraSpeed = 2
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( -1, 1.34161e-07, -2.9694e-07, 0, 0.911303, 0.411737, 3.25841e-07, 0.411737, -0.911303, 0, 0.51, -1.161 )
 fov = 26.8
+
+[node name="Debug" type="Label" parent="."]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "test"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
 visible = false
@@ -97,6 +105,7 @@ transform = Transform( 0.317, 0, 0, 0, 0.317, 0, 0, 0, 1, 0, 0.0446961, 0 )
 frames = SubResource( 8 )
 animation = "idle"
 
-[node name="Sprite3D" type="Sprite3D" parent="Character"]
+[node name="Shadow" type="Sprite3D" parent="Character"]
 transform = Transform( 0.04, 0, 0, 0, -4.37114e-10, -1, 0, 0.01, -4.37114e-08, -0.00576492, -0.136756, -2.23894e-09 )
+visible = false
 texture = ExtResource( 11 )
